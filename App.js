@@ -23,7 +23,7 @@ function HomeScreen({ navigation }) {
             }}
           >
             <View style={styles.idModal}>
-              <TextInput placeholder='ID Github' keyboardType='numeric' style={styles.textInput}></TextInput>
+              <TextInput placeholder='ID Github' style={styles.textInput}></TextInput>
               <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.buttonStart}>
                 <Text style={styles.textModal}>
                   <FontAwesome style={styles.iconSearch} name="search" size={20} color="#341933" />
@@ -341,6 +341,7 @@ const styles = StyleSheet.create({
     borderColor:'black',
     alignItems:'center',
     justifyContent:'center',
+    
   },
 });
 
