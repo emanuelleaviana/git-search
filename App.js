@@ -1,15 +1,21 @@
 import * as React from 'react';
-import { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Button } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
+import { NavigationContainer, TabRouter } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TextInput } from 'react-native-gesture-handler';
 import { FontAwesome, FontAwesome5, Entypo, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { BlurView, VibrancyView } from "@react-native-community/blur";
 
 
 function HomeScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [user, setUser] = useState("");
+
+  function Profile() {
+    navigation.navigate('Profile', {
+      user:user
+    });
+  }
 
   return (
     <>
@@ -25,8 +31,13 @@ function HomeScreen({ navigation }) {
           >
             <View style={styles.backgroundColorModal}>
               <View style={styles.idModal}>
-                <TextInput placeholder='Insira o seu ID Github =)' style={styles.textInput}></TextInput>
-                <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.buttonStart}>
+                <TextInput 
+                onChangeText={newUser => setUser(newUser)}
+                defaultValue={user}
+                placeholder='Insira o seu ID Github =)' 
+                style={styles.textInput}
+                ></TextInput>
+                <TouchableOpacity onPress={Profile} style={styles.buttonStart}>
                   <Text style={styles.textModal}>
                     <AntDesign name="checksquare" size={33} color="black" />
                   </Text>
@@ -46,18 +57,43 @@ function HomeScreen({ navigation }) {
   );
 }
 
-function Profile({ navigation }) {
+function Profile({ route }) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [login, setlogin] = useState(null);
+  const [avatar, setAvatar] = useState(null);
+  const [name, setName] = useState(null);
+
+
+  const user = route.params.user
+
+  useEffect(() => {
+      fetch(`https://api.github.com/users/${user}`)
+      .then( (response) => response.json())
+      .then( (data) => setlogin(data.login))
+  },[]);
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}`)
+    .then( (response) => response.json())
+    .then( (image) => setAvatar(image.avatar_url))
+},[]);
+useEffect(() => {
+  fetch(`https://api.github.com/users/${user}`)
+  .then( (response) => response.json())
+  .then( (name) => setName(name.name))
+
+},[]);
+  
 
   return (
     <View style={styles.conteinerProfile}>
-      <View style={styles.profilePictureCustomize}>
+      <View style={styles.conteinerUpPage}> 
+        <Image style={styles.profilePictureCustomize} source={{uri:avatar}}></Image>
         <Modal
           animationType='fade'
           transparent={true}
           visible={modalVisible}
           onRequestClose={() => {
-            r
             setModalVisible(!modalVisible);
           }}
         >
@@ -68,13 +104,13 @@ function Profile({ navigation }) {
             </TouchableOpacity>
           </View>
         </Modal>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.modal}>
-          <FontAwesome style={styles.iconSearch} name="search" size={28} color="white" />
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.modalProfile}>
+          <FontAwesome style={styles.iconSearch} name="search" size={20} color="white" />
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.nameProfile}>Emanuelle Viana</Text>
-      <Text style={styles.nicknameProfile}>@emanuelleaviana</Text>
+      <Text style={styles.nameProfile}>{name}</Text>
+      <Text style={styles.nicknameProfile}>@{login}</Text>
 
       <View>
         <TouchableOpacity style={[styles.individualButton, { borderTopStartRadius: 20, borderTopEndRadius: 20 }]} onPress={() => navigation.navigate('Bio')}>
@@ -224,7 +260,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor:'rgba(0,0,0,0.6)',
-    
   },
   idModal: {
     width: 300,
@@ -251,6 +286,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
   },
+  conteinerUpPage: {
+    borderRadius: 50,
+    justifyContent: 'center',
+  },
   profilePictureCustomize: {
     borderRadius: 50,
     width: 170,
@@ -272,6 +311,15 @@ const styles = StyleSheet.create({
     top: 300,
     right: 10,
   },
+  modalProfile: {
+    width: 50,
+    height: 50,
+    backgroundColor: 'black',
+    borderRadius: 20,
+    alignSelf: 'flex-end',
+    justifyContent: 'center',
+    bottom: 40,
+  },
   textModalProfile: {
     textAlign: 'left',
     alignSelf: 'flex-start',
@@ -281,10 +329,11 @@ const styles = StyleSheet.create({
   nameProfile: {
     fontWeight: 'bold',
     fontSize: 20,
-    marginTop: 10,
+    bottom:20,
   },
   nicknameProfile: {
     color: '#858585',
+    bottom:12,
     marginBottom: 20,
   },
   individualButton: {
