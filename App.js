@@ -13,7 +13,7 @@ function HomeScreen({ navigation }) {
 
   function Profile() {
     navigation.navigate('Profile', {
-      user:user
+      user: user
     });
   }
 
@@ -31,11 +31,11 @@ function HomeScreen({ navigation }) {
           >
             <View style={styles.backgroundColorModal}>
               <View style={styles.idModal}>
-                <TextInput 
-                onChangeText={newUser => setUser(newUser)}
-                defaultValue={user}
-                placeholder='Insira o seu ID Github =)' 
-                style={styles.textInput}
+                <TextInput
+                  onChangeText={newUser => setUser(newUser)}
+                  defaultValue={user}
+                  placeholder='Insira o seu ID Github =)'
+                  style={styles.textInput}
                 ></TextInput>
                 <TouchableOpacity onPress={Profile} style={styles.buttonStart}>
                   <Text style={styles.textModal}>
@@ -43,7 +43,7 @@ function HomeScreen({ navigation }) {
                   </Text>
                 </TouchableOpacity>
               </View>
-              </View>
+            </View>
           </Modal>
           <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.modal}>
             <FontAwesome style={styles.iconSearch} name="search" size={24} color="white" />
@@ -57,38 +57,67 @@ function HomeScreen({ navigation }) {
   );
 }
 
-function Profile({ route }) {
+function Profile({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [login, setlogin] = useState(null);
   const [avatar, setAvatar] = useState(null);
   const [name, setName] = useState(null);
-
+  const [code, setCode] = useState(null);
 
   const user = route.params.user
 
   useEffect(() => {
-      fetch(`https://api.github.com/users/${user}`)
-      .then( (response) => response.json())
-      .then( (data) => setlogin(data.login))
-  },[]);
+    fetch(`https://api.github.com/users/${user}`)
+      .then((response) => response.json())
+      .then((data) => setlogin(data.login))
+  }, []);
 
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}`)
-    .then( (response) => response.json())
-    .then( (image) => setAvatar(image.avatar_url))
-},[]);
-useEffect(() => {
-  fetch(`https://api.github.com/users/${user}`)
-  .then( (response) => response.json())
-  .then( (name) => setName(name.name))
+      .then((response) => response.json())
+      .then((image) => setAvatar(image.avatar_url))
+  }, []);
 
-},[]);
-  
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}`)
+      .then((response) => response.json())
+      .then((name) => setName(name.name))
+  }, []);
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}`)
+      .then((response) => response.json())
+      .then((code) => setCode(code.id))
+  }, []);
+
+  function Bio() {
+    navigation.navigate('Bio', {
+      user: user
+    });
+  }
+
+  function Orgs() {
+    navigation.navigate('Orgs', {
+      user: user
+    });
+  }
+
+  function Repository() {
+    navigation.navigate('Repositórios', {
+      user: user
+    });
+  }
+
+  function Follows() {
+    navigation.navigate('Seguidores', {
+      user: user
+    });
+  }
 
   return (
     <View style={styles.conteinerProfile}>
-      <View style={styles.conteinerUpPage}> 
-        <Image style={styles.profilePictureCustomize} source={{uri:avatar}}></Image>
+      <View style={styles.conteinerUpPage}>
+        <Image style={styles.profilePictureCustomize} source={{ uri: avatar }}></Image>
         <Modal
           animationType='fade'
           transparent={true}
@@ -98,14 +127,14 @@ useEffect(() => {
           }}
         >
           <View style={styles.idModalProfile}>
-            <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.buttonStart}>
-              <Text style={styles.textModalProfile}>User:</Text>
-              <Text style={styles.textModalProfile}>Id:</Text>
+            <TouchableOpacity style={styles.buttonStart}>
+              <Text style={styles.textModalProfile}><Text style={[{fontWeight:'bold', flexDirection:'column' }]}>User: </Text>@{user}</Text>
+              <Text style={styles.textModalProfile}><Text style={[{fontWeight:'bold', flexDirection:'column' }]}>ID: </Text>{code}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.modalProfile}>
-          <FontAwesome style={styles.iconSearch} name="search" size={20} color="white" />
+          <FontAwesome style={styles.iconSearch} name="search" size={20} color="#50327c" />
         </TouchableOpacity>
       </View>
 
@@ -113,7 +142,7 @@ useEffect(() => {
       <Text style={styles.nicknameProfile}>@{login}</Text>
 
       <View>
-        <TouchableOpacity style={[styles.individualButton, { borderTopStartRadius: 20, borderTopEndRadius: 20 }]} onPress={() => navigation.navigate('Bio')}>
+        <TouchableOpacity style={[styles.individualButton, { borderTopStartRadius: 20, borderTopEndRadius: 20 }]} onPress={Bio}>
           <View style={styles.iconButton}><FontAwesome5 name="user" size={28} color="black" /></View>
           <View>
             <Text style={styles.textButtons}>Bio</Text>
@@ -122,7 +151,7 @@ useEffect(() => {
           <Text style={[styles.iconArrowButton, { marginLeft: 100 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.individualButton} onPress={() => navigation.navigate('Orgs')}>
+        <TouchableOpacity style={styles.individualButton} onPress={Orgs}>
           <View style={styles.iconButton}>
             <FontAwesome5 name="headset" size={28} color="black" />
           </View>
@@ -133,7 +162,7 @@ useEffect(() => {
           <Text style={[styles.iconArrowButton, { marginLeft: 30 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.individualButton} onPress={() => navigation.navigate('Repositórios')}>
+        <TouchableOpacity style={styles.individualButton} onPress={Repository}>
           <View style={styles.iconButton}><Ionicons name="document-text-outline" size={28} color="black" /></View>
           <View>
             <Text style={styles.textButtons}>Repositórios</Text>
@@ -142,7 +171,7 @@ useEffect(() => {
           <Text style={[styles.iconArrowButton, { marginLeft: 32 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.individualButton, { borderBottomStartRadius: 20, borderBottomEndRadius: 20 }]} onPress={() => navigation.navigate('Seguidores')}>
+        <TouchableOpacity style={[styles.individualButton, { borderBottomStartRadius: 20, borderBottomEndRadius: 20 }]} onPress={Follows}>
           <View style={styles.iconButton}><MaterialCommunityIcons name="face-recognition" size={28} color="black" /></View>
           <View>
             <Text style={styles.textButtons}>Seguidores</Text>
@@ -164,34 +193,77 @@ useEffect(() => {
   )
 }
 
-function Bio() {
+function Bio({ route, navigation }) {
+
+  const [bio, setBio] = useState(null);
+
+  const user = route.params.user
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}`)
+      .then((response) => response.json())
+      .then((bio) => setBio(bio.bio))
+  }, []);
+
   return (
     <View>
-      <Text>Olá mundo!</Text>
+      <Text>"{bio}"</Text>
     </View>
   )
 }
 
-function OrgsPage() {
+function OrgsPage({ route, navigation }) {
+  const [orgs, setOrgs] = useState(null);
+
+  const user = route.params.user
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}`)
+      .then((response) => response.json())
+      .then((orgs) => setOrgs(orgs.company))
+  }, []);
+
   return (
     <View>
-      <Text>PAGINAS ORGS</Text>
+      <Text>{orgs}</Text>
     </View>
   )
 }
 
-function RepositoryPage() {
+function RepositoryPage({ route, navigation }) {
+
+  const [repository, setRepository] = useState(null);
+
+  const user = route.params.user
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}/repos`)
+      .then((response) => response.json())
+      .then((repository) => setRepository(repository.repos=id))
+  }, []);
+
   return (
     <View>
-      <Text>PAGINA REPOSITORIOS</Text>
+      <Text>{repository}</Text>
     </View>
   )
 }
 
-function FollowsPage() {
+function FollowsPage({ route, navigation }) {
+  const [follows, setFollows] = useState(null);
+
+  const user = route.params.user
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${user}/followers`)
+      .then((response) => response.json())
+      .then((follows) => setFollows(follows.follows))
+  }, []);
+
+
   return (
     <View>
-      <Text>Olá mundo!</Text>
+      <Text>{follows}</Text>
     </View>
   )
 }
@@ -259,12 +331,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor:'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   idModal: {
     width: 300,
     height: 100,
-    borderRadius:20,
+    borderRadius: 20,
     backgroundColor: '#50327c',
     flexDirection: 'row',
     alignSelf: 'center',
@@ -274,7 +346,7 @@ const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
     width: 200,
-    borderRadius:10,
+    borderRadius: 10,
     backgroundColor: 'white',
     paddingHorizontal: 6,
   },
@@ -299,17 +371,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   idModalProfile: {
-    width: 150,
+    width: 200,
     height: 70,
-    backgroundColor: '#86626E',
+    backgroundColor: '#50327c',
     borderTopRightRadius: 30,
     borderBottomLeftRadius: 30,
     borderTopLeftRadius: 30,
     flexDirection: 'row',
     alignSelf: 'center',
     alignItems: 'center',
-    top: 300,
-    right: 10,
+    top:160,
+    right:30,
+    padding:8,
   },
   modalProfile: {
     width: 50,
@@ -321,6 +394,7 @@ const styles = StyleSheet.create({
     bottom: 40,
   },
   textModalProfile: {
+    color:'white',
     textAlign: 'left',
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',
@@ -329,11 +403,11 @@ const styles = StyleSheet.create({
   nameProfile: {
     fontWeight: 'bold',
     fontSize: 20,
-    bottom:20,
+    bottom: 20,
   },
   nicknameProfile: {
     color: '#858585',
-    bottom:12,
+    bottom: 12,
     marginBottom: 20,
   },
   individualButton: {
