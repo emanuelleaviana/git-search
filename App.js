@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, FlatList } from 'react-native';
 import { NavigationContainer, TabRouter } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TextInput } from 'react-native-gesture-handler';
@@ -52,8 +52,6 @@ function HomeScreen({ navigation }) {
         <Text style={styles.textInitial}>Clique na lupa e escreva o nome do usuário (id) do Github que você deseja consultar!</Text>
       </View><AntDesign style={styles.iconGitHub} name="github" size={24} color="black" />
     </>
-
-
   );
 }
 
@@ -108,6 +106,12 @@ function Profile({ route, navigation }) {
     });
   }
 
+  function Reset() {
+    navigation.push('Home', {
+      user: null
+    });
+  }
+
   function Follows() {
     navigation.navigate('Seguidores', {
       user: user
@@ -128,8 +132,8 @@ function Profile({ route, navigation }) {
         >
           <View style={styles.idModalProfile}>
             <TouchableOpacity style={styles.buttonStart}>
-              <Text style={styles.textModalProfile}><Text style={[{fontWeight:'bold', flexDirection:'column' }]}>User: </Text>@{user}</Text>
-              <Text style={styles.textModalProfile}><Text style={[{fontWeight:'bold', flexDirection:'column' }]}>ID: </Text>{code}</Text>
+              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>User: </Text>@{user}</Text>
+              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>ID: </Text>{code}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
@@ -148,7 +152,7 @@ function Profile({ route, navigation }) {
             <Text style={styles.textButtons}>Bio</Text>
             <Text style={styles.subtitleButton}>Um pouco sobre o usuário</Text>
           </View>
-          <Text style={[styles.iconArrowButton, { marginLeft: 100 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
+          <Text style={[styles.iconArrowButton, { marginLeft: 108 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.individualButton} onPress={Orgs}>
@@ -159,7 +163,7 @@ function Profile({ route, navigation }) {
             <Text style={styles.textButtons}>Orgs</Text>
             <Text style={styles.subtitleButton}>Organizações que o usuário faz parte</Text>
           </View>
-          <Text style={[styles.iconArrowButton, { marginLeft: 30 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
+          <Text style={[styles.iconArrowButton, { marginLeft: 55 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.individualButton} onPress={Repository}>
@@ -168,7 +172,7 @@ function Profile({ route, navigation }) {
             <Text style={styles.textButtons}>Repositórios</Text>
             <Text style={styles.subtitleButton}>Lista contendo todos os repositórios</Text>
           </View>
-          <Text style={[styles.iconArrowButton, { marginLeft: 32 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
+          <Text style={[styles.iconArrowButton, { marginLeft: 55 }]}> <AntDesign name="right" size={24} color="black" /> </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.individualButton, { borderBottomStartRadius: 20, borderBottomEndRadius: 20 }]} onPress={Follows}>
@@ -182,7 +186,7 @@ function Profile({ route, navigation }) {
       </View>
 
       <View style={styles.backgroundResetButton}>
-        <TouchableOpacity style={styles.resetButton}>
+        <TouchableOpacity style={styles.resetButton} onPress={Reset}>
           <Text style={{ fontSize: 16 }}> <Entypo name="log-out" size={20} color="black" /> Resetar</Text>
         </TouchableOpacity>
       </View>
@@ -206,9 +210,13 @@ function Bio({ route, navigation }) {
   }, []);
 
   return (
-    <View>
-      <Text>"{bio}"</Text>
+    <View style={styles.conteiner}>
+      <View>
+        <Text>"{bio}"</Text>
+      </View>
     </View>
+
+
   )
 }
 
@@ -218,14 +226,19 @@ function OrgsPage({ route, navigation }) {
   const user = route.params.user
 
   useEffect(() => {
-    fetch(`https://api.github.com/users/${user}`)
+    fetch(`https://api.github.com/users/${user}/orgs`)
       .then((response) => response.json())
-      .then((orgs) => setOrgs(orgs.company))
+      .then((orgs) => setOrgs(orgs))
   }, []);
 
   return (
     <View>
-      <Text>{orgs}</Text>
+      <FlatList
+        data={orgs}
+        keyExtractor={data => data.company}
+        renderItem={({ item }) => <Text>Repositório: {item.company} </Text>}
+      >
+      </FlatList>
     </View>
   )
 }
@@ -236,16 +249,20 @@ function RepositoryPage({ route, navigation }) {
 
   const user = route.params.user
 
+
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}/repos`)
       .then((response) => response.json())
-      .then((repository) => setRepository(repository.repos=id))
+      .then((repository) => setRepository(repository))
   }, []);
 
   return (
-    <View>
-      <Text>{repository}</Text>
-    </View>
+    <FlatList
+      data={repository}
+      keyExtractor={data => data.name}
+      renderItem={({ item }) => <Text>Repositório: {item.name} </Text>}
+    >
+    </FlatList>
   )
 }
 
@@ -257,13 +274,26 @@ function FollowsPage({ route, navigation }) {
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}/followers`)
       .then((response) => response.json())
-      .then((follows) => setFollows(follows.follows))
+      .then((follows) => setFollows(follows))
   }, []);
 
 
   return (
     <View>
-      <Text>{follows}</Text>
+      <FlatList
+        data={follows}
+        keyExtractor={data => data.follows}
+        renderItem={({ item }) => {
+          return (
+            <View style={styles.conteiner}>
+              <View style={styles.listContent}>
+              <Text> {item.login} </Text>
+              </View>
+            </View>
+          )
+        }}
+      >
+      </FlatList>
     </View>
   )
 }
@@ -380,9 +410,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'center',
     alignItems: 'center',
-    top:160,
-    right:30,
-    padding:8,
+    top: 160,
+    right: 30,
+    padding: 8,
   },
   modalProfile: {
     width: 50,
@@ -394,7 +424,7 @@ const styles = StyleSheet.create({
     bottom: 40,
   },
   textModalProfile: {
-    color:'white',
+    color: 'white',
     textAlign: 'left',
     alignSelf: 'flex-start',
     justifyContent: 'flex-start',
@@ -457,7 +487,6 @@ const styles = StyleSheet.create({
     borderTopEndRadius: 30,
     borderTopStartRadius: 30,
     justifyContent: 'center',
-
   },
   resetButton: {
     width: 340,
@@ -468,8 +497,13 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     alignItems: 'center',
     justifyContent: 'center',
-
   },
+  listContent: {
+    width:200,
+    borderColor:'black',
+    borderWidth:1,
+    justifyContent:'center',
+  }
 });
 
 export default App;
