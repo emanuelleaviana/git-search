@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, FlatList } from 'react-native';
-import { NavigationContainer, TabRouter } from '@react-navigation/native';
+import { NavigationContainer, TabRouter, useRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TextInput } from 'react-native-gesture-handler';
 import { FontAwesome, FontAwesome5, Entypo, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -12,7 +12,7 @@ function HomeScreen({ navigation }) {
   const [user, setUser] = useState("");
 
   function Profile() {
-    navigation.navigate('Profile', {
+    navigation.push('Profile', {
       user: user
     });
   }
@@ -32,8 +32,8 @@ function HomeScreen({ navigation }) {
             <View style={styles.backgroundColorModal}>
               <View style={styles.idModal}>
                 <TextInput
-                  onChangeText={newUser => setUser(newUser)}
                   defaultValue={user}
+                  onChangeText={newUser => setUser(newUser)}
                   placeholder='Insira o seu ID Github =)'
                   style={styles.textInput}
                 ></TextInput>
@@ -95,7 +95,7 @@ function Profile({ route, navigation }) {
   }
 
   function Orgs() {
-    navigation.navigate('Orgs', {
+    navigation.push('Orgs', {
       user: user
     });
   }
@@ -211,41 +211,49 @@ function Bio({ route, navigation }) {
 
   return (
     <View style={styles.conteiner}>
-      <View>
-        <Text>"{bio}"</Text>
+      <View style={styles.bioCard}>
+        <Text style={{ color: 'white', textAlign: 'justify', fontSize: 18, fontStyle: 'italic' }}>"{bio}"</Text>
       </View>
     </View>
-
-
   )
 }
 
-function OrgsPage({ route, navigation }) {
-  const [orgs, setOrgs] = useState(null);
+function OrgsPage({ navigation }) {
+  const [orgs, setOrgs] = useState([]);
 
+  const route = useRoute()
   const user = route.params.user
 
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}/orgs`)
       .then((response) => response.json())
-      .then((orgs) => setOrgs(orgs))
+      .then((data) => setOrgs(data))
   }, []);
 
   return (
-    <View>
-      <FlatList
-        data={orgs}
-        keyExtractor={data => data.company}
-        renderItem={({ item }) => <Text>Repositório: {item.company} </Text>}
-      >
-      </FlatList>
-    </View>
+    orgs.message ?
+      <View><Text>aaloao</Text></View>
+      :
+      <View>
+        <FlatList
+          data={orgs}
+          renderItem={({ item }) => {
+            return (
+              <View style={styles.conteiner}>
+                <View style={styles.cardsList}>
+                  <Text style={styles.textList}>{item.login} </Text>
+                </View>
+              </View>
+            )
+          }}
+        />
+      </View>
   )
 }
 
 function RepositoryPage({ route, navigation }) {
 
-  const [repository, setRepository] = useState(null);
+  const [repository, setRepository] = useState([]);
 
   const user = route.params.user
 
@@ -253,14 +261,22 @@ function RepositoryPage({ route, navigation }) {
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}/repos`)
       .then((response) => response.json())
-      .then((repository) => setRepository(repository))
+      .then((data) => setRepository(data))
   }, []);
 
   return (
     <FlatList
       data={repository}
       keyExtractor={data => data.name}
-      renderItem={({ item }) => <Text>Repositório: {item.name} </Text>}
+      renderItem={({ item }) => {
+        return (
+          <View style={styles.conteiner}>
+            <View style={styles.cardsList}>
+              <Text style={styles.textList}>{item.name} </Text>
+            </View>
+          </View>
+        )
+      }}
     >
     </FlatList>
   )
@@ -285,9 +301,12 @@ function FollowsPage({ route, navigation }) {
         keyExtractor={data => data.follows}
         renderItem={({ item }) => {
           return (
-            <View style={styles.conteiner}>
-              <View style={styles.listContent}>
-              <Text> {item.login} </Text>
+            <View style={styles.conteiner2}>
+              <View style={{ justifyContent: 'center', alignItems: 'center', marginBottom: 6, flexDirection: 'row' }}>
+                <Image style={styles.profilePictureFollowers} source={{ uri: item.avatar_url }}></Image>
+                <View style={styles.listContent}>
+                  <Text style={styles.textListFollows}> {item.login} </Text>
+                </View>
               </View>
             </View>
           )
@@ -320,6 +339,12 @@ function App() {
 const styles = StyleSheet.create({
   conteiner: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  conteiner2: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -498,11 +523,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  bioCard: {
+    width: '90%',
+    height: 200,
+    backgroundColor: '#50327c',
+    justifyContent: 'center',
+    borderRadius: 40,
+    padding: 15,
+  },
   listContent: {
-    width:200,
-    borderColor:'black',
-    borderWidth:1,
-    justifyContent:'center',
+    width: 100,
+    backgroundColor: '#50327c',
+    borderWidth: 1,
+    borderColor: 'black',
+    justifyContent: 'center',
+    marginTop: 5,
+    marginBottom: 5,
+    padding: 6,
+    borderBottomRightRadius: 9,
+    borderTopRightRadius: 9,
+    borderTopLeftRadius: 9,
+    marginLeft: 3,
+  },
+  profilePictureFollowers: {
+    borderRadius: 20,
+    width: 80,
+    height: 80,
+    backgroundColor: '#666666',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  textListFollows: {
+    alignSelf: 'center',
+    color: 'white',
+  },
+  cardsList: {
+    width: '80%',
+    height: 100,
+    backgroundColor: '#50327c',
+    borderWidth: 2,
+    borderRadius: 20,
+    margin: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textList: {
+    fontSize: 25,
+    color: 'white',
   }
 });
 
