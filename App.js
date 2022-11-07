@@ -5,6 +5,7 @@ import { NavigationContainer, TabRouter, useRoute } from '@react-navigation/nati
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TextInput } from 'react-native-gesture-handler';
 import { FontAwesome, FontAwesome5, Entypo, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Skeleton from './Skeleton';
 
 
 function HomeScreen({ navigation }) {
@@ -16,7 +17,6 @@ function HomeScreen({ navigation }) {
       user: user
     });
   }
-
   return (
     <>
       <View style={styles.conteiner}>
@@ -118,7 +118,16 @@ function Profile({ route, navigation }) {
     });
   }
 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let timer = setInterval(()=>{
+      setLoading(false);
+    }, 3000)
+  }, [])
+
   return (
+    <Skeleton visible={loading}>
     <View style={styles.conteinerProfile}>
       <View style={styles.conteinerUpPage}>
         <Image style={styles.profilePictureCustomize} source={{ uri: avatar }}></Image>
@@ -128,7 +137,7 @@ function Profile({ route, navigation }) {
           visible={modalVisible}
           onRequestClose={() => {
             setModalVisible(!modalVisible);
-          }}
+          } }
         >
           <View style={styles.idModalProfile}>
             <TouchableOpacity style={styles.buttonStart}>
@@ -190,10 +199,8 @@ function Profile({ route, navigation }) {
           <Text style={{ fontSize: 16 }}> <Entypo name="log-out" size={20} color="black" /> Resetar</Text>
         </TouchableOpacity>
       </View>
-
     </View>
-
-
+    </Skeleton>
   )
 }
 
@@ -231,9 +238,6 @@ function OrgsPage({ navigation }) {
   }, []);
 
   return (
-    orgs.message ?
-      <View><Text>aaloao</Text></View>
-      :
       <View>
         <FlatList
           data={orgs}
@@ -299,6 +303,7 @@ function FollowsPage({ route, navigation }) {
       <FlatList
         data={follows}
         keyExtractor={data => data.follows}
+        key={data => data.id}
         renderItem={({ item }) => {
           return (
             <View style={styles.conteiner2}>
