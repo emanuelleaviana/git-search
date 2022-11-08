@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, FlatList } from 'react-native';
-import { NavigationContainer, TabRouter, useRoute } from '@react-navigation/native';
+import { NavigationContainer, useRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TextInput } from 'react-native-gesture-handler';
 import { FontAwesome, FontAwesome5, Entypo, AntDesign, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -57,35 +57,14 @@ function HomeScreen({ navigation }) {
 
 function Profile({ route, navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [login, setlogin] = useState(null);
-  const [avatar, setAvatar] = useState(null);
-  const [name, setName] = useState(null);
-  const [code, setCode] = useState(null);
+  const [data, setData] = useState([]);
 
   const user = route.params.user
 
   useEffect(() => {
     fetch(`https://api.github.com/users/${user}`)
       .then((response) => response.json())
-      .then((data) => setlogin(data.login))
-  }, []);
-
-  useEffect(() => {
-    fetch(`https://api.github.com/users/${user}`)
-      .then((response) => response.json())
-      .then((image) => setAvatar(image.avatar_url))
-  }, []);
-
-  useEffect(() => {
-    fetch(`https://api.github.com/users/${user}`)
-      .then((response) => response.json())
-      .then((name) => setName(name.name))
-  }, []);
-
-  useEffect(() => {
-    fetch(`https://api.github.com/users/${user}`)
-      .then((response) => response.json())
-      .then((code) => setCode(code.id))
+      .then((data) => setData(data))
   }, []);
 
   function Bio() {
@@ -130,7 +109,7 @@ function Profile({ route, navigation }) {
     <Skeleton visible={loading}>
     <View style={styles.conteinerProfile}>
       <View style={styles.conteinerUpPage}>
-        <Image style={styles.profilePictureCustomize} source={{ uri: avatar }}></Image>
+        <Image style={styles.profilePictureCustomize} source={{ uri: data.avatar_url }}></Image>
         <Modal
           animationType='fade'
           transparent={true}
@@ -140,10 +119,11 @@ function Profile({ route, navigation }) {
           } }
         >
           <View style={styles.idModalProfile}>
-            <TouchableOpacity style={styles.buttonStart}>
-              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>User: </Text>@{user}</Text>
-              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>ID: </Text>{code}</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonStart}>
+              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>User: </Text>@{data.login}</Text>
+              <Text style={styles.textModalProfile}><Text style={[{ fontWeight: 'bold', flexDirection: 'column' }]}>ID: </Text>{data.id}</Text>
+            </View>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.buttonX, {width:20, height:20,left:10, bottom:12, borderWidth:1,borderRadius:5,justifyContent:'center', alignItems:'center'}]}><Text style={{fontWeight:'bold'}} >X</Text></TouchableOpacity>
           </View>
         </Modal>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.modalProfile}>
@@ -151,8 +131,8 @@ function Profile({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.nameProfile}>{name}</Text>
-      <Text style={styles.nicknameProfile}>@{login}</Text>
+      <Text style={styles.nameProfile}>{data.name}</Text>
+      <Text style={styles.nicknameProfile}>@{data.login}</Text>
 
       <View>
         <TouchableOpacity style={[styles.individualButton, { borderTopStartRadius: 20, borderTopEndRadius: 20 }]} onPress={Bio}>
@@ -302,7 +282,6 @@ function FollowsPage({ route, navigation }) {
     <View>
       <FlatList
         data={follows}
-        keyExtractor={data => data.follows}
         key={data => data.id}
         renderItem={({ item }) => {
           return (
@@ -443,6 +422,9 @@ const styles = StyleSheet.create({
     top: 160,
     right: 30,
     padding: 8,
+  },
+  buttonX:{
+
   },
   modalProfile: {
     width: 50,

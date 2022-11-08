@@ -27,7 +27,7 @@ export default function Skeleton({ visible, children }) {
             }, 1000);
         })
     }
-
+                                              
     const translateX = AnimatedValue.interpolate({
         inputRange: [0, 1],
         outputRange: [-30, 170]
